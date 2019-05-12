@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu May  9 18:47:08 2019
 
-@author: scarletgv
-"""
+# =============================================================================
+# UFMG - ICEx - DCC - Pesquisa Operacional - 2019/1
+# 
+# TP1: Programação Linear - Simplex
+# 
+# Aluna: Scarlet Gianasi Viana
+# Matrícula: 2016006891
+# 
+# Versão utilizada: Python 3.6.7
+# =============================================================================
+
+import sys
 
 def lePL(arquivoE):
     entrada = open(arquivoE, "r")
@@ -56,7 +64,7 @@ def montaTableau(c, A, b, n, m, duasFases):
        aux+=1
        
     if duasFases:
-        # Inserir variaveis artificiais
+        # Inserindo variaveis artificiais
         cAux = []
         count = 0
         col = 0
@@ -86,7 +94,7 @@ def montaTableau(c, A, b, n, m, duasFases):
         for x in range(0,count):
             cAux.append(1.0)
         
-        cAux.append(0.0) # V.O.
+        cAux.append(0.0)
         Atableau.insert(0,cAux)
         
         imprimeMatriz(Atableau)
@@ -128,7 +136,6 @@ def iniciaSimplex(Atableau, b, n, m):
             VO = Atableau[0][len(Atableau[0])-1]
             print("VO:"+str(VO))
             return round(VO,2), sol
-            #break
             
 
 def pivoteia(pivot, At, n, m):
@@ -139,7 +146,7 @@ def pivoteia(pivot, At, n, m):
     
     for x in range(0,len(At[0])):
         At[linhaP][x] /= elem
-        At[linhaP][x] = round(At[linhaP][x],2)
+        At[linhaP][x] = At[linhaP][x]
     
     for linha in range(0,n+1):
         if linha != linhaP:
@@ -170,9 +177,9 @@ def buscaPivot(Atableau, n):
                 bi = Atableau[linha][tam]
                 if (p > 0) & (bi >= 0):
                     print("Pivot possível: "+str(p))
-                    if round(bi/p,2) < razao:
+                    if bi/p < razao:
                         pivot = [linha, coluna]
-                        razao = round(bi/p,2)
+                        razao = bi/p
             if pivot[1] > -1:
                 print("Pivot encontrado!")
                 print("P:"+str(pivot))
@@ -186,13 +193,20 @@ def certificado(At, m, n):
     return cert
 
 def certificadoIlimitada(At, m, n):
-    cert = [1.0]
+    cert = []
     
     for coluna in range(0,m):
         if At[0][coluna] < 0:
-            for linha in range(1,n+1):
-                cert.append(At[linha][coluna])
+            for colunaM in range(0,m):
+                if At[0][colunaM] == 0:
+                    for linha in range(1,n+1):
+                        if At[linha][colunaM] == 1:
+                            cert.append(At[linha][coluna]*(-1.0) + 0)
+                elif colunaM != coluna:
+                    cert.append(0.0)
+            cert.insert(coluna,1.0)
             break
+        
     cert = [round(i,2) for i in cert]
     return cert
 
@@ -207,8 +221,8 @@ def solucaoViavel(At,m,n):
     sol = [round(i,2) for i in sol]
     return sol
     
-def main():
-    arqE = "tp1_tests/13"
+def simplex():
+    arqE = "tp1_tests/16"#sys.argv[1]
     c, A, b, n, m = lePL(arqE)   
     print("n: "+str(n)+" m: "+str(m))
     print("c: "+str(c))
@@ -224,7 +238,7 @@ def main():
         duasFases = True
         Aaux = montaTableau(c,A,b,n,m,duasFases)
         VO, sol = iniciaSimplex(Aaux, b, n, m)
-        if round(VO,2) == 0:
+        if VO == 0:
             print("Há solução viável!")
             Atab = Aaux
             Atab[0] = c
@@ -238,7 +252,7 @@ def main():
             s = solucaoViavel(Atab, m, n)
             if sol == 'viavel':
                 print("otima")
-                print(VO)
+                print(round(VO,2))
             else:
                 print("ilimitada")
             print(s)
@@ -265,7 +279,7 @@ def main():
             cert = certificadoIlimitada(Atab,m,n)
         else:
             print("otima")
-            print(VO)
+            print(round(VO,2))
             cert = certificado(Atab,m,n)
             
         s = solucaoViavel(Atab, m, n)
@@ -273,4 +287,4 @@ def main():
         print(str(s))
 
 if __name__ == "__main__":
-    main()
+    simplex()
